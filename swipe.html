@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reise-Tinder · Hva vil dere se? · Norgesferie 2026</title>
+  <meta name="description" content="Swipe deg gjennom Norges vakreste reisemål og lag deres felles ønskeliste." />
+  <meta name="theme-color" content="#0d3b52" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏔️</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="swipe.css" />
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__brand">
+        <span class="nav__logo">‹</span>
+        <span>Reiseplan</span>
+      </a>
+      <nav class="nav__links">
+        <a href="#" class="nav__fav" id="nav-fav">❤️ Favoritter (<span id="fav-count">0</span>)</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="swipe">
+    <div class="swipe__head" id="head">
+      <h1>Hva har dere lyst til å se?</h1>
+      <p>Dra kortet mot ❤️ hvis dere vil dit, eller ✕ hvis ikke. Bruk pilene ‹ › for flere bilder. Kartet viser hvor i Norge stedet ligger.</p>
+      <div class="requeue-banner" id="requeue-banner" hidden></div>
+      <div class="progress"><div class="progress__bar" id="bar"></div></div>
+      <div class="counter" id="counter">0 / 0</div>
+      <div class="deck-note" id="deck-note" hidden></div>
+    </div>
+
+    <div class="swipe-stage" id="stage">
+      <div class="deck" id="deck"></div>
+      <aside class="stage-map" id="stage-map" aria-hidden="true"></aside>
+    </div>
+
+    <div class="controls" id="controls">
+      <button id="btn-undo" class="cbtn cbtn--undo" title="Angre" aria-label="Angre">↩</button>
+      <button id="btn-nope" class="cbtn cbtn--nope" title="Nei takk (piltast ←)" aria-label="Nei">✕</button>
+      <button id="btn-like" class="cbtn cbtn--like" title="Lyst! (piltast →)" aria-label="Lyst">❤</button>
+      <button id="btn-fav"  class="cbtn cbtn--fav"  title="Se favoritter" aria-label="Favoritter">★</button>
+    </div>
+
+    <section class="results" id="results" hidden>
+      <div class="results__head">
+        <h2 id="results-title">Deres ønskeliste</h2>
+        <p id="results-sub"></p>
+      </div>
+      <div class="results__grid" id="results-grid"></div>
+      <div class="results__actions">
+        <button class="btn btn--primary" id="btn-more">Swipe videre</button>
+        <button class="btn btn--ghost" id="btn-copy">Kopiér liste</button>
+        <button class="btn btn--ghost" id="btn-clear">Tøm listen</button>
+        <a class="btn btn--ghost" href="index.html">Til reiseplanen</a>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="places.js"></script>
+  <script src="norway-map.js"></script>
+  <script src="swipe.js"></script>
+</body>
+</html>

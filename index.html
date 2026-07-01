@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Norgesferie 2026 · Fjordrunden fra Kongsberg</title>
+  <meta name="description" content="Reiseplanlegger for en uke på norgesferie i bil fra Kongsberg — rute, severdigheter og spektakulær overnatting." />
+  <meta name="theme-color" content="#0d3b52" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏔️</text></svg>" />
+
+  <!-- Leaflet (interaktivt kart) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Fonter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== TOPPMENY ===== -->
+  <header class="nav" id="top">
+    <div class="nav__inner">
+      <a href="#top" class="nav__brand">
+        <span class="nav__logo">▲</span>
+        <span>Norgesferie<span class="nav__year"> ’26</span></span>
+      </a>
+      <nav class="nav__links">
+        <a href="#kart">Kart</a>
+        <a href="#rute">Dag for dag</a>
+        <a href="#severdigheter">Se & gjøre</a>
+        <a href="#overnatting">★ Overnatting</a>
+        <a href="#praktisk">Praktisk</a>
+        <a href="swipe.html" class="nav__cta">🔥 Swipe reisemål</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <div class="hero__content">
+      <p class="hero__eyebrow">Bil · to reisende · ca. én uke</p>
+      <h1 class="hero__title">Den store<br /><span>fjordrunden</span></h1>
+      <p class="hero__lead">
+        Fra Kongsberg gjennom Hardangervidda, langs fjordene i vest, opp Trollstigen
+        og hjem gjennom fjellheimen. Her er forslag til hvor dere kan dra, hva dere bør se —
+        og de mest spektakulære stedene å sove en natt midt i ferien.
+      </p>
+      <div class="hero__facts">
+        <div class="fact">
+          <span class="fact__num" id="countdown">–</span>
+          <span class="fact__label">dager til avreise</span>
+        </div>
+        <div class="fact">
+          <span class="fact__num">6.–12.</span>
+          <span class="fact__label">juli 2026</span>
+        </div>
+        <div class="fact">
+          <span class="fact__num">≈1 450</span>
+          <span class="fact__label">km totalt</span>
+        </div>
+        <div class="fact">
+          <span class="fact__num">7</span>
+          <span class="fact__label">dager på veien</span>
+        </div>
+      </div>
+      <div class="hero__cta">
+        <a href="#kart" class="btn btn--primary">Se ruten på kart</a>
+        <a href="#overnatting" class="btn btn--ghost">★ Book drømmenatten</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SWIPE-PROMO ===== -->
+  <section class="promo">
+    <div class="promo__inner">
+      <div class="promo__text">
+        <span class="promo__eyebrow">🔥 Nyhet</span>
+        <h2>Vet dere ikke helt hva dere vil se?</h2>
+        <p>Swipe dere gjennom <strong>219 av Norges vakreste steder</strong> — som en Tinder for reisemål. Dra mot ❤️ på det dere har lyst til å oppleve, så bygger dere en felles ønskeliste med lokasjon, avstand fra bilvei og turlengde.</p>
+        <a href="swipe.html" class="btn btn--primary">Start swipingen →</a>
+      </div>
+      <div class="promo__cards" aria-hidden="true">
+        <div class="promo__card promo__card--3"></div>
+        <div class="promo__card promo__card--2"></div>
+        <div class="promo__card promo__card--1">
+          <span>❤️</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PERSONLIG RUTE (fra swipe) ===== -->
+  <section id="minrute" class="section section--tint">
+    <div class="section__head">
+      <h2>Deres rute — bygget fra det dere likte</h2>
+      <p>Denne oppdaterer seg automatisk fra stedene dere velger i <a href="swipe.html">Reise-Tinder</a>. Rekkefølgen er en fornuftig kjørerekkefølge ut fra Kongsberg.</p>
+    </div>
+    <div id="minrute-body"><!-- fylles av JS --></div>
+    <div id="vraket-wrap"><!-- «nei»-bunken + fjernede, fylles av JS --></div>
+    <div class="lagring">
+      <p class="lagring__note"><span class="lagring__badge">💾 Lagret</span> Valgene deres lagres automatisk på denne maskinen – ruten er her igjen neste gang, også etter at PC-en har vært avslått. <span class="lagring__hint">Åpne appen på samme måte hver gang (samme snarvei/fane), og ikke i et privat/inkognito-vindu.</span></p>
+      <button class="reset-btn" id="reset-all">🗑️ Start på nytt</button>
+    </div>
+  </section>
+
+  <!-- ===== KART ===== -->
+  <section id="kart" class="section">
+    <div class="section__head">
+      <h2>Vårt ruteforslag</h2>
+      <p>Dere bygger deres egen rute ved å swipe — men er dere nysgjerrige, kan dere titte på vårt ferdige forslag med de fineste stoppene og de spektakulære overnattingene.</p>
+      <button class="btn btn--ghost btn--sm" id="kart-toggle" aria-expanded="false" aria-controls="kart-reveal">🗺️ Vis vårt ruteforslag</button>
+    </div>
+
+    <div id="kart-reveal" hidden>
+    <div class="filters" id="filters">
+      <button class="chip chip--active" data-filter="all">Alt</button>
+      <button class="chip" data-filter="Fjord">🌊 Fjord</button>
+      <button class="chip" data-filter="Utsikt">🏔 Utsikt</button>
+      <button class="chip" data-filter="Foss">💧 Foss</button>
+      <button class="chip" data-filter="Kjøretur">🚗 Kjøretur</button>
+      <button class="chip" data-filter="Vandring">🥾 Vandring</button>
+      <button class="chip" data-filter="Kultur">🏛 Kultur</button>
+      <button class="chip" data-filter="Mat">🍽 Mat & drikke</button>
+    </div>
+
+    <div class="map-wrap">
+      <div id="map" role="application" aria-label="Kart over reiseruten"></div>
+      <div class="map-legend">
+        <span><i class="dot" style="background:#2a9d8f"></i>Fjord</span>
+        <span><i class="dot" style="background:#3a86ff"></i>Utsikt</span>
+        <span><i class="dot" style="background:#48cae4"></i>Foss</span>
+        <span><i class="dot" style="background:#e76f51"></i>Kjøretur</span>
+        <span><i class="dot" style="background:#588157"></i>Vandring</span>
+        <span><i class="dot" style="background:#9d4edd"></i>Kultur</span>
+        <span><i class="dot dot--star">★</i>Overnatting</span>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ===== DAG FOR DAG ===== -->
+  <section id="rute" class="section section--tint">
+    <div class="section__head">
+      <h2>Forslag til rute — dag for dag</h2>
+      <p>En rundtur som er raus, men mulig på en uke. Alt kan kortes ned: hopp over en fjord, bli en dag lenger et sted dere trives. Se den <a href="#rolig-alt">roligere varianten</a> nederst.</p>
+    </div>
+    <div class="timeline" id="timeline"><!-- fylles av JS --></div>
+
+    <div id="rolig-alt" class="callout">
+      <h3>💡 Vil dere kjøre mindre?</h3>
+      <p>
+        Kutt ut Geiranger/Trollstigen og gjør en roligere <strong>Hardanger &amp; Sogn-runde</strong>
+        (≈ 850 km): Kongsberg → Vøringsfossen → Hardangerfjord (2 netter) → Stegastein &amp; Flåm →
+        Sognefjorden (spektakulær natt) → hjem via Valdres. Da får dere mer tid <em>på</em> hvert sted
+        og mindre tid bak rattet.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== SE OG GJØRE ===== -->
+  <section id="severdigheter" class="section">
+    <div class="section__head">
+      <h2>Se &amp; gjøre underveis</h2>
+      <p>Høydepunktene langs ruten. Bruk filteret over — kortene her følger samme valg.</p>
+    </div>
+    <div class="cards" id="poi-cards"><!-- fylles av JS --></div>
+    <p class="empty-msg" id="poi-empty" hidden>Ingen treff på dette filteret — prøv «Alt».</p>
+  </section>
+
+  <!-- ===== OVERNATTING ===== -->
+  <section id="overnatting" class="section section--dark">
+    <div class="section__head">
+      <h2>★ Den spektakulære natten</h2>
+      <p>
+        Unn dere <strong>én natt</strong> et sted dere aldri glemmer — omtrent midt i turen (natt 3–4),
+        når dere er i fjordriket. Her er seks kuraterte perler. Juli er høysesong, så
+        <strong>book nå</strong> — de beste rommene forsvinner tidlig.
+      </p>
+    </div>
+    <div class="stays" id="stays"><!-- fylles av JS --></div>
+    <p class="stays__foot">
+      Vil dere sammenligne flere alternativer i ett område?
+      <a href="https://www.booking.com/searchresults.html?ss=Sognefjorden%2C%20Norge" target="_blank" rel="noopener">Søk overnatting på Booking →</a>
+    </p>
+  </section>
+
+  <!-- ===== PRAKTISK ===== -->
+  <section id="praktisk" class="section section--tint">
+    <div class="section__head">
+      <h2>Praktisk å vite</h2>
+      <p>Småting som gjør bilferien i juli glattere.</p>
+    </div>
+    <div class="info-grid" id="info-grid"><!-- fylles av JS --></div>
+  </section>
+
+  <!-- ===== SJEKKLISTE ===== -->
+  <section id="sjekkliste" class="section">
+    <div class="section__head">
+      <h2>Sjekkliste før avreise</h2>
+      <p>Huk av etter hvert — det lagres i nettleseren deres.</p>
+    </div>
+    <div class="checklist" id="checklist"><!-- fylles av JS --></div>
+    <button class="btn btn--ghost btn--sm" id="reset-checklist">Nullstill sjekkliste</button>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__title">God tur, Morten &amp; samboer! 🚗💨</p>
+      <p class="footer__note">
+        Laget som reisehjelp — kjøretider og avstander er omtrentlige. Sjekk alltid
+        <a href="https://www.yr.no" target="_blank" rel="noopener">yr.no</a> for vær og
+        <a href="https://www.vegvesen.no/trafikk/" target="_blank" rel="noopener">vegvesen.no</a> for veimeldinger og ferjeruter før dere kjører.
+      </p>
+      <details class="footer__sources">
+        <summary>Kilder</summary>
+        <ul>
+          <li><a href="https://www.fjordnorway.com/no/reiseinspirasjon/informasjon-om-stenging-av-trollstigen" target="_blank" rel="noopener">Fjord Norway — Trollstigen åpning/stenging</a></li>
+          <li><a href="https://www.nasjonaleturistveger.no/en/routes/hardangervidda/" target="_blank" rel="noopener">Nasjonale turistveger — Hardangervidda &amp; Vøringsfossen</a></li>
+          <li><a href="https://juvet.com/en" target="_blank" rel="noopener">Juvet Landskapshotell</a></li>
+          <li><a href="https://www.roomandwild.com/room-trees-norway" target="_blank" rel="noopener">Woodnest — Odda Treehouse</a></li>
+          <li><a href="https://en.kviknes.no/" target="_blank" rel="noopener">Kviknes Hotel, Balestrand</a></li>
+          <li><a href="https://www.visitnorway.com/hotels-more/hotels/exclusive-hotels/" target="_blank" rel="noopener">Visit Norway — hoteller i særklasse</a></li>
+          <li><a href="https://en.visitbergen.com/things-to-do/norway-fjords/stegastein-viewpoint-near-flam-with-spectacular-fjord-views" target="_blank" rel="noopener">Stegastein utsiktspunkt</a></li>
+        </ul>
+      </details>
+    </div>
+  </footer>
+
+  <script src="places.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -6,6 +6,8 @@ En liten webapp som hjelper med å planlegge en ukes bilferie i Norge fra Kongsb
 
 Dobbeltklikk på **`index.html`** — den åpnes i nettleseren. Alt fungerer offline bortsett fra kartrutene og reisemål-bildene, som lastes fra internett.
 
+**På mobil:** kjør `./publish.sh` i Terminal én gang — den legger appen gratis på nett (GitHub Pages) og printer adressen. Åpne adressen på telefonen og velg «Legg til på Hjem-skjerm», så oppfører den seg som en app med eget ikon. Overfør valgene med **💾 Sikkerhetskopi / overfør**-knappen.
+
 ## Innhold
 
 | Fil | Hva det er |

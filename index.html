@@ -106,7 +106,32 @@
     <div id="vraket-wrap"><!-- «nei»-bunken + fjernede, fylles av JS --></div>
     <div class="lagring">
       <p class="lagring__note"><span class="lagring__badge">💾 Lagret</span> Valgene deres lagres automatisk på denne maskinen – ruten er her igjen neste gang, også etter at PC-en har vært avslått. <span class="lagring__hint">Åpne appen på samme måte hver gang (samme snarvei/fane), og ikke i et privat/inkognito-vindu.</span></p>
-      <button class="reset-btn" id="reset-all">🗑️ Start på nytt</button>
+      <div class="lagring__actions">
+        <button class="btn btn--ghost btn--sm" id="backup-toggle" aria-expanded="false" aria-controls="backup-panel">💾 Sikkerhetskopi / overfør</button>
+        <button class="btn btn--ghost btn--sm" id="print-plan">🖨️ Skriv ut dagsplanen</button>
+        <button class="reset-btn" id="reset-all">🗑️ Start på nytt</button>
+      </div>
+    </div>
+
+    <div class="backup-panel" id="backup-panel" hidden>
+      <div class="backup-col">
+        <h4>💾 Ta sikkerhetskopi / del ruten</h4>
+        <p>Koden inneholder alle valgene deres (ruten, «nei»-bunken, bortvalgte og sjekklisten). Lagre den i et notat som backup – eller send den til den andres telefon/PC og hent den inn der.</p>
+        <textarea id="backup-out" rows="4" readonly spellcheck="false"></textarea>
+        <div class="backup-btns">
+          <button class="btn btn--ghost btn--sm" id="backup-copy">📋 Kopiér koden</button>
+          <button class="btn btn--ghost btn--sm" id="backup-download">⬇️ Last ned som fil</button>
+        </div>
+      </div>
+      <div class="backup-col">
+        <h4>📥 Hent inn valg</h4>
+        <p>Lim inn en kode under. <b>Slå sammen</b> beholder alt dere har og legger til ❤️-stedene fra koden (fint når dere har swipet hver for dere). <b>Erstatt alt</b> overskriver alt med koden.</p>
+        <textarea id="backup-in" rows="4" placeholder="NF26:…" spellcheck="false"></textarea>
+        <div class="backup-btns">
+          <button class="btn btn--ghost btn--sm" id="backup-merge">🤝 Slå sammen</button>
+          <button class="btn btn--ghost btn--sm" id="backup-replace">♻️ Erstatt alt</button>
+        </div>
+      </div>
     </div>
   </section>
 

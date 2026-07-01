@@ -326,12 +326,16 @@ img { max-width: 100%; }
 .myroute-meta a.myroute-nav:hover { background: #d6e4fd; text-decoration: none; }
 
 /* Dagsinndeling i ruten */
-.myroute-day { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0 2px; padding: 0 2px; }
+.myroute-day { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; margin: 10px 0 2px; padding: 0 2px; }
 .myroute-list > .myroute-day:first-child { margin-top: 0; }
 .myroute-day__num { font-family: var(--serif); font-weight: 700; font-size: 0.98rem; color: #fff; background: var(--fjord); border-radius: 999px; padding: 4px 14px; }
+.myroute-day__date { font-size: 0.8rem; font-weight: 700; color: var(--teal); }
 .myroute-day__meta { font-size: 0.76rem; font-weight: 600; color: var(--ink-soft); }
+.myroute-day__nav { margin-left: auto; font-size: 0.76rem; font-weight: 700; background: #e8f0fe; color: #2b5cb8; padding: 4px 12px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+.myroute-day__nav:hover { background: #d6e4fd; text-decoration: none; }
 .myroute-sleep { font-size: 0.8rem; color: var(--ink-soft); padding: 2px 4px 8px; }
 .myroute-sleep b { color: var(--fjord); }
+.myroute-sleep a { font-weight: 700; }
 .myroute-remove { flex: none; margin-left: auto; align-self: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: var(--ink-soft); font-size: 0.85rem; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: background .15s, color .15s, border-color .15s, transform .15s; }
 .myroute-remove:hover { background: var(--coral); border-color: var(--coral); color: #fff; transform: scale(1.08); }
 
@@ -411,9 +415,21 @@ button.myroute-mode--fallback:hover { background: #e4e9ea; color: var(--fjord); 
 .vraket-reswipe { flex: none; background: var(--fjord); color: #fff; border: none; font-family: var(--sans); font-weight: 700; font-size: 0.86rem; padding: 10px 18px; border-radius: 999px; cursor: pointer; transition: background .15s; }
 .vraket-reswipe:hover { background: var(--fjord-deep); }
 
-/* Lagring / start på nytt */
+/* Lagring / sikkerhetskopi / start på nytt */
 .lagring { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line); }
 .lagring__note { font-size: 0.85rem; color: var(--ink-soft); margin: 0; flex: 1 1 340px; line-height: 1.55; }
+.lagring__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+/* Sikkerhetskopi-panel */
+.backup-panel { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.backup-panel[hidden] { display: none; }
+.backup-col { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+.backup-col h4 { margin: 0 0 8px; font-family: var(--serif); font-size: 1.05rem; color: var(--fjord); }
+.backup-col p { margin: 0 0 12px; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.5; }
+.backup-col textarea { width: 100%; box-sizing: border-box; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; color: var(--ink); background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; resize: vertical; word-break: break-all; }
+.backup-col textarea:focus { outline: 2px solid var(--teal); border-color: var(--teal); }
+.backup-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+@media (max-width: 720px) { .backup-panel { grid-template-columns: 1fr; } }
 .lagring__badge { display: inline-block; background: #e3f3ee; color: #1c7c6b; font-weight: 700; font-size: 0.72rem; padding: 2px 9px; border-radius: 999px; margin-right: 5px; }
 .lagring__hint { opacity: 0.85; }
 .reset-btn { flex: none; background: #fff; color: var(--fjord); border: 1px solid var(--line); font-family: var(--sans); font-weight: 600; font-size: 0.85rem; padding: 9px 16px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
@@ -439,4 +455,24 @@ button.myroute-mode--fallback:hover { background: #e4e9ea; color: var(--fjord); 
 @media (max-width: 460px) {
   .fact__num { font-size: 1.5rem; }
   .btn { width: 100%; justify-content: center; }
+}
+
+/* ===== Print: kun deres dagsplan ===== */
+@media print {
+  .nav, .hero, .promo, #kart, #rute, #severdigheter, #overnatting, #praktisk, #sjekkliste, .footer,
+  #vraket-wrap, .lagring, .backup-panel, .myroute-map, .myroute-photo, .myroute-remove,
+  .myroute-day__nav, .myroute-meta a.myroute-nav, .u-noprint, #minrute .btn, .route-toast, .lightbox,
+  #reset-checklist { display: none !important; }
+  body { background: #fff; color: #000; }
+  .section--tint { background: none; }
+  #minrute.section { padding: 0 0 20px; }
+  .section__head { margin-bottom: 14px; }
+  .section__head p { display: none; }
+  .myroute-grid { display: block; }
+  .myroute-list { max-height: none; overflow: visible; padding: 0; }
+  .myroute-item { box-shadow: none; border: 1px solid #bbb; break-inside: avoid; page-break-inside: avoid; }
+  .myroute-day { break-after: avoid-page; page-break-after: avoid; }
+  .myroute-day__num { background: #000 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .myroute-foot { border-top: 1px solid #bbb; }
+  .myroute-note--time { background: none; border: 1px solid #bbb; }
 }

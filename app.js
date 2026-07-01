@@ -587,6 +587,29 @@ let mapMarkers = []; // { marker, tags }
     return (r - whole === 0.5) ? `${whole}½ t` : `${whole} t`;
   }
 
+  /* ---------- Turdatoer (avreise man. 6. juli 2026) + lenker per dag ---------- */
+  const TRIP_START = new Date(2026, 6, 6);
+  const FMT_DAY = new Intl.DateTimeFormat("nb-NO", { weekday: "short", day: "numeric", month: "long" });
+  const FMT_MONTH = new Intl.DateTimeFormat("nb-NO", { month: "long" });
+  function dayDate(d) { return new Date(TRIP_START.getFullYear(), TRIP_START.getMonth(), TRIP_START.getDate() + d); }
+  function isoDate(dt) { return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`; }
+  function nightRange(d) {
+    const a = dayDate(d), b = dayDate(d + 1);
+    return a.getMonth() === b.getMonth()
+      ? `${a.getDate()}.–${b.getDate()}. ${FMT_MONTH.format(a)}`
+      : `${a.getDate()}. ${FMT_MONTH.format(a)} – ${b.getDate()}. ${FMT_MONTH.format(b)}`;
+  }
+  // Booking-søk for riktig natt, ferdig utfylt med sted og datoer
+  function bookingUrl(name, d) {
+    return `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(name + ", Norge")}&checkin=${isoDate(dayDate(d))}&checkout=${isoDate(dayDate(d + 1))}&group_adults=2&no_rooms=1`;
+  }
+  // Hele dagsetappen i Google Maps (maks 9 viapunkter støttes)
+  function gmapsDir(origin, dest, wps) {
+    const c = p => `${p.lat},${p.lng}`;
+    const wp = wps.slice(0, 9).map(c).join("|");
+    return `https://www.google.com/maps/dir/?api=1&origin=${c(origin)}&destination=${c(dest)}${wp ? `&waypoints=${encodeURIComponent(wp)}` : ""}&travelmode=driving`;
+  }
+
   function render() {
     renderVraket();
     const ids = liked();
@@ -661,17 +684,24 @@ let mapMarkers = []; // { marker, tags }
     const listHtml = dayChunks.map((day, d) => {
       const stops = day.idx.map(i => stopHtml(seq[i], i)).join("");
       if (!multiDay) return stops;
+      const prev = d > 0 ? dayChunks[d - 1] : null;
+      const origin = prev && prev.idx.length ? seq[prev.idx[prev.idx.length - 1]] : KONGSBERG;   // der dere våkner
+      const dateHtml = `<span class="myroute-day__date">${FMT_DAY.format(dayDate(d))}</span>`;
       if (day.homeOnly) return `
-            <li class="myroute-day"><span class="myroute-day__num">Dag ${d + 1}</span><span class="myroute-day__meta">🚗 ${fmtHours(day.drive)} kjøring</span></li>
+            <li class="myroute-day"><span class="myroute-day__num">Dag ${d + 1}</span>${dateHtml}<span class="myroute-day__meta">🚗 ${fmtHours(day.drive)} kjøring</span><a class="myroute-day__nav" href="${gmapsDir(origin, KONGSBERG, [])}" target="_blank" rel="noopener">🧭 Naviger etappen</a></li>
             <li class="myroute-sleep">🏁 Hjemreise til Kongsberg – rundt ${fmtHours(day.drive)} bak rattet, med pauser der det frister.</li>`;
-      const lastStop = seq[day.idx[day.idx.length - 1]];
+      const dayStops = day.idx.map(i => seq[i]);
+      const lastStop = dayStops[dayStops.length - 1];
       const isLast = d === dayChunks.length - 1;
+      const nav = (isLast && day.homeLeg)
+        ? gmapsDir(origin, KONGSBERG, dayStops)                       // dagens stopp, så helt hjem
+        : gmapsDir(origin, lastStop, dayStops.slice(0, -1));
       return `
-            <li class="myroute-day"><span class="myroute-day__num">Dag ${d + 1}</span><span class="myroute-day__meta">🚗 ${fmtHours(day.drive)} kjøring · 🕒 ${fmtHours(day.visit)} på stedene</span></li>
+            <li class="myroute-day"><span class="myroute-day__num">Dag ${d + 1}</span>${dateHtml}<span class="myroute-day__meta">🚗 ${fmtHours(day.drive)} kjøring · 🕒 ${fmtHours(day.visit)} på stedene</span><a class="myroute-day__nav" href="${nav}" target="_blank" rel="noopener">🧭 Naviger etappen</a></li>
             ${stops}
             ${isLast
               ? `<li class="myroute-sleep">🏁 …og så hjem til Kongsberg (≈ ${fmtHours(day.homeLeg || 0)} kjøring).</li>`
-              : `<li class="myroute-sleep">🛏 Natt ${d + 1}: overnatt gjerne i nærheten av <b>${lastStop.name}</b>.</li>`}`;
+              : `<li class="myroute-sleep">🛏 <b>Natt ${d + 1}</b> (${nightRange(d)}): overnatt gjerne i nærheten av <b>${lastStop.name}</b><span class="u-noprint"> · <a href="${bookingUrl(lastStop.name, d)}" target="_blank" rel="noopener">Søk overnatting →</a></span></li>`}`;
     }).join("");
 
     const modeHtml = mode === "road"
@@ -814,17 +844,106 @@ let mapMarkers = []; // { marker, tags }
     if (t) { vwrap.classList.toggle("open"); t.setAttribute("aria-expanded", vwrap.classList.contains("open")); }
   });
 
-  // «Start på nytt» – nullstiller alle swipe-valg
-  const resetBtn = document.getElementById("reset-all");
-  if (resetBtn) resetBtn.addEventListener("click", () => {
-    if (!confirm("Vil dere slette alle swipe-valg (ruten, «nei»-bunken og de fjernede) og starte helt på nytt?")) return;
-    ["norgesferie-liked", NOPE_KEY, REMOVED_KEY, REQUEUE_KEY].forEach(k => localStorage.removeItem(k));
-    render();
-    toastEl.innerHTML = "<span>✨ Alt nullstilt – klar for en ny swiperunde!</span>";
+  function flashToast(msg) {
+    toastEl.innerHTML = `<span>${msg}</span>`;
     if (!toastEl.parentNode) document.body.appendChild(toastEl);
     toastEl.classList.add("show");
     clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 4000);
+  }
+
+  // «Start på nytt» – nullstiller alle swipe-valg
+  const resetBtn = document.getElementById("reset-all");
+  if (resetBtn) resetBtn.addEventListener("click", () => {
+    if (!confirm("Vil dere slette alle swipe-valg (ruten, «nei»-bunken og de fjernede) og starte helt på nytt?\n\nTips: ta en sikkerhetskopi først (💾-knappen), så kan dere angre senere.")) return;
+    ["norgesferie-liked", NOPE_KEY, REMOVED_KEY, REQUEUE_KEY].forEach(k => localStorage.removeItem(k));
+    render();
+    flashToast("✨ Alt nullstilt – klar for en ny swiperunde!");
   });
+
+  /* ---------- Sikkerhetskopi: eksport/import/deling av alle valg ---------- */
+  const CHECK_KEY = "norgesferie-checklist";
+  function exportCode() {
+    const data = { v: 1, dato: isoDate(new Date()) };
+    [["liked", "norgesferie-liked"], ["nope", NOPE_KEY], ["removed", REMOVED_KEY]].forEach(([f, k]) => {
+      try { data[f] = JSON.parse(localStorage.getItem(k)) || []; } catch (e) { data[f] = []; }
+    });
+    try { data.check = JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) { data.check = {}; }
+    return "NF26:" + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  }
+  function parseCode(raw) {
+    let code = (raw || "").trim().replace(/\s+/g, "");
+    if (code.startsWith("NF26:")) code = code.slice(5);
+    const data = JSON.parse(decodeURIComponent(escape(atob(code))));
+    if (!data || data.v !== 1) throw new Error("ukjent versjon");
+    const clean = a => (Array.isArray(a) ? a.filter(id => byId[id]) : []);
+    return { liked: clean(data.liked), nope: clean(data.nope), removed: clean(data.removed),
+             check: (data.check && typeof data.check === "object") ? data.check : {} };
+  }
+  function applyImport(inc, merge) {
+    let nl, nn, nr, nc;
+    if (merge) {                                   // union: ❤️ vinner over nei/fjernet
+      nl = [...new Set([...liked(), ...inc.liked])];
+      nn = [...new Set([...loadList(NOPE_KEY), ...inc.nope])].filter(id => !nl.includes(id));
+      nr = [...new Set([...loadList(REMOVED_KEY), ...inc.removed])].filter(id => !nl.includes(id));
+      let cur = {}; try { cur = JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) {}
+      nc = { ...cur };
+      Object.keys(inc.check).forEach(k => { if (inc.check[k]) nc[k] = true; });
+    } else {
+      nl = inc.liked;
+      nn = inc.nope.filter(id => !nl.includes(id));
+      nr = inc.removed.filter(id => !nl.includes(id));
+      nc = inc.check;
+    }
+    saveLiked(nl); saveList(NOPE_KEY, nn); saveList(REMOVED_KEY, nr);
+    try { localStorage.setItem(CHECK_KEY, JSON.stringify(nc)); } catch (e) {}
+    return nl.length;
+  }
+  const bkPanel = document.getElementById("backup-panel");
+  const bkToggle = document.getElementById("backup-toggle");
+  const bkOut = document.getElementById("backup-out");
+  const bkIn = document.getElementById("backup-in");
+  if (bkPanel && bkToggle && bkOut && bkIn) {
+    bkToggle.addEventListener("click", () => {
+      const show = bkPanel.hidden;
+      bkPanel.hidden = !show;
+      bkToggle.setAttribute("aria-expanded", String(show));
+      if (show) bkOut.value = exportCode();
+    });
+    document.getElementById("backup-copy").addEventListener("click", () => {
+      bkOut.value = exportCode();
+      bkOut.select(); bkOut.setSelectionRange(0, 999999);
+      const ok = () => flashToast("📋 Koden er kopiert – lagre den i et notat!");
+      const manuelt = () => flashToast("Koden er merket – kopiér med Ctrl/Cmd+C");
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(bkOut.value).then(ok, manuelt);
+      else manuelt();
+    });
+    document.getElementById("backup-download").addEventListener("click", () => {
+      const blob = new Blob([exportCode() + "\n"], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `norgesferie-valg-${isoDate(new Date())}.txt`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      flashToast("⬇️ Sikkerhetskopi lastet ned");
+    });
+    const doImport = (merge) => {
+      let inc;
+      try { inc = parseCode(bkIn.value); } catch (e) { flashToast("🤔 Koden ble ikke gjenkjent – lim inn hele koden (starter med NF26:)"); return; }
+      if (!merge) {
+        const n = liked().length;
+        if (!confirm(`Erstatte alle valg på denne enheten${n ? ` (${n} steder i ruten nå)` : ""} med innholdet i koden (${inc.liked.length} steder)?\n\nTips: «Slå sammen» beholder begge deler.`)) return;
+      }
+      const n = applyImport(inc, merge);
+      flashToast(`✅ Hentet inn – ${n} steder i ruten. Laster siden på nytt …`);
+      setTimeout(() => window.location.reload(), 1200);
+    };
+    document.getElementById("backup-merge").addEventListener("click", () => doImport(true));
+    document.getElementById("backup-replace").addEventListener("click", () => doImport(false));
+  }
+
+  // Print-vennlig dagsplan
+  const printBtn = document.getElementById("print-plan");
+  if (printBtn) printBtn.addEventListener("click", () => window.print());
 
   render();
   // oppdater når favoritter/bortvalgte endres (annen fane) eller når man kommer tilbake til siden

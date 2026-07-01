@@ -1,0 +1,15 @@
+{
+  "name": "Norgesferie 2026",
+  "short_name": "Norgesferie",
+  "description": "Reiseplanlegger for bilferien fra Kongsberg 6.–12. juli 2026 – rute, dagsetapper og Reise-Tinder.",
+  "lang": "no",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8f9",
+  "theme_color": "#0d3b52",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

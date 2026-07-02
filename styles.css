@@ -305,7 +305,7 @@ img { max-width: 100%; }
 /* ===== Personlig rute (fra swipe) ===== */
 .myroute-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 22px; align-items: start; }
 .myroute-map { height: clamp(360px, 56vh, 520px); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid var(--line); z-index: 1; background: #aadaf0; }
-.myroute-list { list-style: none; margin: 0; padding: 0 4px 0 0; max-height: clamp(360px, 56vh, 520px); overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.myroute-list { list-style: none; margin: 0; padding: 0 4px 0 0; max-height: clamp(360px, 56vh, 520px); overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 10px; }
 .myroute-item { display: flex; flex-direction: column; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 13px 15px; box-shadow: var(--shadow); }
 .myroute-top { display: flex; gap: 13px; align-items: center; }
 .myroute-num { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--coral); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 0.9rem; }
@@ -325,8 +325,8 @@ img { max-width: 100%; }
 .myroute-meta a.myroute-nav { font-size: 0.74rem; font-weight: 700; background: #e8f0fe; color: #2b5cb8; padding: 3px 9px; border-radius: 999px; text-decoration: none; }
 .myroute-meta a.myroute-nav:hover { background: #d6e4fd; text-decoration: none; }
 
-/* Dagsinndeling i ruten */
-.myroute-day { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; margin: 10px 0 2px; padding: 0 2px; }
+/* Dagsinndeling i ruten – overskriftene kleber øverst mens man blar i lista */
+.myroute-day { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; margin: 10px 0 2px; padding: 7px 10px; background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
 .myroute-list > .myroute-day:first-child { margin-top: 0; }
 .myroute-day__num { font-family: var(--serif); font-weight: 700; font-size: 0.98rem; color: #fff; background: var(--fjord); border-radius: 999px; padding: 4px 14px; }
 .myroute-day__date { font-size: 0.8rem; font-weight: 700; color: var(--teal); }
@@ -342,6 +342,17 @@ img { max-width: 100%; }
 /* Fjern-knapp inne i kart-popup */
 .popup__remove { margin-top: 10px; width: 100%; border: 1px solid var(--coral); background: #fff; color: var(--coral); font-family: var(--sans); font-weight: 700; font-size: 0.82rem; padding: 7px 10px; border-radius: 9px; cursor: pointer; transition: background .15s, color .15s; }
 .popup__remove:hover { background: var(--coral); color: #fff; }
+
+/* Bilde i kart-popup → fullskjermsvisning */
+.popup--rich { width: 224px; max-width: 100%; }
+.popup__photo { position: relative; display: block; width: 100%; padding: 0; margin: 8px 0 4px; border: none; background: var(--paper-2); border-radius: 10px; overflow: hidden; cursor: zoom-in; }
+.popup__photo img { display: block; width: 100%; height: 118px; object-fit: cover; transition: transform .3s ease; }
+.popup__photo:hover img { transform: scale(1.05); }
+.popup__photo-count { position: absolute; right: 7px; bottom: 7px; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; pointer-events: none; }
+
+/* Blink på stoppet i lista når man klikker kartnåla */
+.myroute-item { transition: box-shadow .3s ease; }
+.myroute-item.is-flash { box-shadow: 0 0 0 3px var(--coral), var(--shadow); }
 
 /* Angre-toast når man fjerner et sted */
 .route-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(18px); background: var(--fjord); color: #fff; padding: 11px 14px 11px 20px; border-radius: 999px; box-shadow: var(--shadow-lg); font-size: 0.9rem; display: flex; align-items: center; gap: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 3000; }
@@ -371,7 +382,7 @@ button.myroute-mode--fallback:hover { background: #e4e9ea; color: var(--fjord); 
 .lightbox { position: fixed; inset: 0; z-index: 4000; background: rgba(8, 20, 28, 0.93); display: flex; align-items: center; justify-content: center; gap: clamp(6px, 2vw, 24px); padding: clamp(12px, 3vw, 44px); }
 .lightbox[hidden] { display: none; }
 .lightbox__stage { margin: 0; display: flex; flex-direction: column; align-items: center; max-width: min(1100px, 92vw); }
-.lightbox__img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 10px; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); background: #0a1015; cursor: pointer; }
+.lightbox__img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 10px; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); background: #0a1015; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
 .lightbox__cap { margin-top: 14px; text-align: center; color: #fff; display: flex; flex-wrap: wrap; gap: 5px 14px; align-items: baseline; justify-content: center; }
 .lightbox__title { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; }
 .lightbox__count { font-size: 0.85rem; color: rgba(255, 255, 255, 0.82); font-weight: 700; }
@@ -401,7 +412,7 @@ button.myroute-mode--fallback:hover { background: #e4e9ea; color: var(--fjord); 
 .vraket-note { font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 16px; max-width: 640px; }
 .vraket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
 .vraket-card { display: flex; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px; box-shadow: var(--shadow); }
-.vraket-thumb { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; flex: none; background: var(--paper-2); }
+.vraket-thumb { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; flex: none; background: var(--paper-2); cursor: zoom-in; }
 .vraket-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .vraket-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; padding: 2px 8px; border-radius: 999px; align-self: flex-start; }
 .vraket-tag--nei { background: #fde4e4; color: #b23b3b; }
@@ -436,8 +447,16 @@ button.myroute-mode--fallback:hover { background: #e4e9ea; color: var(--fjord); 
 .reset-btn:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
 @media (max-width: 820px) {
   .myroute-grid { grid-template-columns: 1fr; }
-  .myroute-list { max-height: none; overflow: visible; }
+  /* Egen scrollboks også på mobil, så man slipper å bla forbi alle stoppene
+     for å komme videre på siden (samme oppførsel som på desktop) */
+  .myroute-list { max-height: 64vh; }
   .myroute-foot .btn { margin-left: 0; }
+  /* Kompakt klebrig dagsoverskrift på små skjermer */
+  .myroute-day { gap: 3px 8px; padding: 6px 9px; }
+  .myroute-day__num { font-size: 0.85rem; padding: 2px 10px; }
+  .myroute-day__date { font-size: 0.74rem; }
+  .myroute-day__meta { font-size: 0.7rem; }
+  .myroute-day__nav { font-size: 0.7rem; padding: 3px 9px; margin-left: 0; }
 }
 
 /* ===== Responsivt ===== */

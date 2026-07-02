@@ -302,15 +302,22 @@ let mapMarkers = []; // { marker, tags }
   L.marker([59.6685, 9.6494], { icon: homeIcon }).addTo(map)
     .bindPopup(`<div class="popup"><span class="popup__day">Start & mål</span><h4>Kongsberg</h4><p>Turen starter og ender her.</p></div>`);
 
-  // Severdigheter
+  // Severdigheter – med bilder fra reisemål-databasen der navnet matcher
+  const normName = s => (s || "").toLowerCase().replace(/[^a-zæøå0-9]/g, "");
+  const placeByName = {};
+  (window.PLACES || []).forEach(p => { placeByName[normName(p.name)] = p; });
   POIS.forEach(p => {
     const c = CAT[p.cat];
     const icon = L.divIcon({
       className: "", html: `<div class="pin" style="background:${c.color}"><span>${c.icon}</span></div>`,
       iconSize: [26, 26], iconAnchor: [13, 24], popupAnchor: [0, -22],
     });
+    const match = placeByName[normName(p.name)];
+    const photo = match && match.images && match.images.length
+      ? `<button class="popup__photo" type="button" data-photo="${match.id}" aria-label="Se bildene av ${p.name} i fullskjerm"><img src="${match.images[0].src}" alt="" loading="lazy" /><span class="popup__photo-count">📷 ${match.images.length > 1 ? `${match.images.length} bilder` : "1 bilde"}</span></button>`
+      : "";
     const m = L.marker([p.lat, p.lng], { icon }).addTo(map)
-      .bindPopup(`<div class="popup"><span class="popup__day">Dag ${p.day} · ${p.cat}</span><h4>${p.name}</h4><p>${p.desc}</p></div>`);
+      .bindPopup(`<div class="popup${photo ? " popup--rich" : ""}"><span class="popup__day">Dag ${p.day} · ${p.cat}</span><h4>${p.name}</h4>${photo}<p>${p.desc}</p><a class="popup__nav" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">🧭 Åpne i Google Maps</a></div>`);
     mapMarkers.push({ marker: m, tags: p.tags, layer: map });
   });
 
@@ -481,7 +488,7 @@ let mapMarkers = []; // { marker, tags }
         <div class="vraket-grid">
           ${items.map(o => { const p = byId[o.id]; const img = p.images && p.images[0] ? p.images[0].src : ""; return `
             <div class="vraket-card">
-              ${img ? `<img class="vraket-thumb" src="${img}" alt="" loading="lazy" />` : ""}
+              ${img ? `<img class="vraket-thumb" src="${img}" alt="" loading="lazy" data-photo="${p.id}" title="Se bildene av ${p.name}" role="button" tabindex="0" />` : ""}
               <div class="vraket-body">
                 <span class="vraket-tag vraket-tag--${o.src}">${o.src === "nei" ? "👎 Swipet nei" : "🗺️ Fjernet fra ruten"}</span>
                 <h4>${p.name}</h4>
@@ -710,6 +717,10 @@ let mapMarkers = []; // { marker, tags }
       ? `<span class="myroute-mode myroute-mode--loading">🛰️ beregner rute …</span>`
       : `<button type="button" class="myroute-mode myroute-mode--fallback" id="route-retry" title="Prøv å hente veirute på nytt">📏 luftlinje · prøv igjen ↻</button>`;
 
+    // Husk hvor langt ned i lista man var, så fjern/angre/veirute-svar ikke hopper til toppen
+    const oldList = body.querySelector(".myroute-list");
+    const keepScroll = oldList ? oldList.scrollTop : 0;
+
     body.innerHTML = `
       <div class="myroute-grid">
         <div id="map-mine" class="myroute-map"></div>
@@ -734,6 +745,9 @@ let mapMarkers = []; // { marker, tags }
           : "📏 Anslag basert på <b>luftlinje × 1,25</b> ved ~65 km/t (ingen nettforbindelse, eller for mange stopp for automatisk veiruting). «På stedene» er summert fra turlengden. Ferje- og bomtider kommer i tillegg."
       }</p>`;
 
+    const newList = body.querySelector(".myroute-list");
+    if (newList && keepScroll) newList.scrollTop = keepScroll;
+
     if (typeof L === "undefined") return;
     const map = L.map("map-mine", { scrollWheelZoom: false }).setView([KONGSBERG.lat, KONGSBERG.lng], 5);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 17, attribution: "© OpenStreetMap" }).addTo(map);
@@ -741,8 +755,11 @@ let mapMarkers = []; // { marker, tags }
     L.marker([KONGSBERG.lat, KONGSBERG.lng], { icon: home }).addTo(map).bindPopup("<div class='popup'><h4>Kongsberg</h4><p>Start & mål</p></div>");
     seq.forEach((p, i) => {
       const icon = L.divIcon({ className: "", html: `<div class="pin pin--num"><span>${i + 1}</span></div>`, iconSize: [26, 26], iconAnchor: [13, 24], popupAnchor: [0, -22] });
+      const photo = p.images && p.images.length
+        ? `<button class="popup__photo" type="button" data-photo="${p.id}" aria-label="Se bildene av ${p.name} i fullskjerm"><img src="${p.images[0].src}" alt="" loading="lazy" /><span class="popup__photo-count">📷 ${p.images.length > 1 ? `${p.images.length} bilder` : "1 bilde"}</span></button>`
+        : "";
       L.marker([p.lat, p.lng], { icon }).addTo(map)
-        .bindPopup(`<div class="popup"><span class="popup__day">Stopp ${i + 1} · ${p.region}</span><h4>${p.name}</h4>${p.cost ? `<p>💰 ${p.cost}</p>` : ""}<a class="popup__nav" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">🧭 Åpne i Google Maps</a><button class="popup__remove" data-id="${p.id}">✕ Fjern fra ruten</button></div>`);
+        .bindPopup(`<div class="popup popup--rich"><span class="popup__day">Stopp ${i + 1} · ${p.region}</span><h4>${p.name}</h4>${photo}${p.cost ? `<p>💰 ${p.cost}</p>` : ""}<a class="popup__nav" href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener">🧭 Åpne i Google Maps</a><button class="popup__remove" data-id="${p.id}">✕ Fjern fra ruten</button></div>`);
     });
     if (geometry && geometry.coordinates) {
       // ekte veigeometri fra OSRM (GeoJSON [lng,lat] → Leaflet [lat,lng])
@@ -756,7 +773,21 @@ let mapMarkers = []; // { marker, tags }
     map.on("popupopen", (e) => {
       const el = e.popup.getElement();
       const btn = el && el.querySelector(".popup__remove");
-      if (btn) btn.addEventListener("click", () => removePlace(btn.dataset.id));
+      if (!btn) return;
+      btn.addEventListener("click", () => removePlace(btn.dataset.id));
+      // Rull lista til stoppet og gi det et lite blink – uten å flytte selve siden
+      const item = body.querySelector(`.myroute-remove[data-id="${btn.dataset.id}"]`);
+      const list = body.querySelector(".myroute-list");
+      if (item && list) {
+        const li = item.closest(".myroute-item");
+        // plasser stoppet rett under dagens klebrige overskrift (høyden varierer med skjermbredde)
+        let hdr = li.previousElementSibling;
+        while (hdr && !hdr.classList.contains("myroute-day")) hdr = hdr.previousElementSibling;
+        const off = (hdr ? hdr.offsetHeight : 44) + 10;
+        list.scrollTop = li.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop - off;
+        li.classList.add("is-flash");
+        setTimeout(() => li.classList.remove("is-flash"), 1600);
+      }
     });
     myMap = map;
   }
@@ -796,6 +827,11 @@ let mapMarkers = []; // { marker, tags }
     const multi = lbList.length > 1;
     lbPrev.style.visibility = multi ? "" : "hidden";
     lbNext.style.visibility = multi ? "" : "hidden";
+    // forhåndslast nabobildene så blaing føles umiddelbar
+    if (multi) [lbI + 1, lbI - 1].forEach(k => {
+      const n = lbList[(k + lbList.length) % lbList.length];
+      if (n) { const pre = new Image(); pre.src = n.src; }
+    });
   }
   function openLightbox(place, idx) {
     if (!place || !place.images || !place.images.length) return;
@@ -816,8 +852,20 @@ let mapMarkers = []; // { marker, tags }
   lb.querySelector(".lightbox__close").addEventListener("click", lbClose);
   lbPrev.addEventListener("click", (e) => { e.stopPropagation(); lbNav(-1); });
   lbNext.addEventListener("click", (e) => { e.stopPropagation(); lbNav(1); });
-  lbImg.addEventListener("click", (e) => { e.stopPropagation(); lbNav(1); });   // trykk på bildet = neste
   lb.addEventListener("click", (e) => { if (e.target === lb) lbClose(); });      // klikk på bakgrunn lukker
+  // Trykk på bildet = neste. Sveip mot venstre/høyre (mobil) = neste/forrige.
+  let lbDownX = null, lbSwiped = false;
+  lbImg.addEventListener("pointerdown", (e) => { lbDownX = e.clientX; lbSwiped = false; });
+  lbImg.addEventListener("pointerup", (e) => {
+    if (lbDownX === null) return;
+    const dx = e.clientX - lbDownX; lbDownX = null;
+    if (Math.abs(dx) > 40) { lbSwiped = true; lbNav(dx < 0 ? 1 : -1); }
+  });
+  lbImg.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (lbSwiped) { lbSwiped = false; return; }   // sveip skal ikke også telle som klikk
+    lbNav(1);
+  });
 
   // Klikk i lista: ✕ fjerner, bilde åpner fullskjerm (delegert – body består ved ny render)
   body.addEventListener("click", (e) => {
@@ -827,6 +875,12 @@ let mapMarkers = []; // { marker, tags }
     if (retry) { roadState = { sig: null, status: "idle" }; render(); return; }
     const ph = e.target.closest(".myroute-photo");
     if (ph) openLightbox(byId[ph.dataset.photo], 0);
+  });
+
+  // Bilder i kart-popups (begge kart) og bortvalgte-miniatyrer → fullskjerm
+  document.addEventListener("click", (e) => {
+    const ph = e.target.closest(".popup__photo, .vraket-thumb");
+    if (ph && ph.dataset.photo) openLightbox(byId[ph.dataset.photo], 0);
   });
 
   // Bortvalgte-panelet: vis/skjul + «Ta med likevel» (delegert)
